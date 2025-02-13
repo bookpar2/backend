@@ -82,8 +82,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 import dj_database_url
 
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+# 만약 DATABASE_URL이 바이트 문자열이라면 디코딩
+if isinstance(DATABASE_URL, bytes):
+    DATABASE_URL = DATABASE_URL.decode('utf-8')
+
 DATABASES = {
-    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+    'default': dj_database_url.parse(DATABASE_URL)
 }
 
 
