@@ -9,6 +9,10 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from pathlib import Path
 
@@ -77,8 +81,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DATABASE_NAME'),  # 환경 변수로 DB 이름 가져오기
+        'USER': os.getenv('DATABASE_USER'),  # 환경 변수로 DB 사용자 이름 가져오기
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),  # 환경 변수로 DB 비밀번호 가져오기
+        'HOST': os.getenv('DATABASE_HOST', 'localhost'),  # 기본값 localhost
+        'PORT': os.getenv('DATABASE_PORT', '3306'),  # 기본값 3306
     }
 }
 
