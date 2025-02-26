@@ -39,13 +39,16 @@ ALLOWED_HOSTS = [ '*' ]
 # 앱 나열해주기
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'book',
+    'chat',
     'storages',
     'users',
     'rest_framework',
@@ -53,6 +56,14 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
 ]
+
+ASGI_APPLICATION = 'config.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
 
 # 사용자 모델 설정
 AUTH_USER_MODEL = 'users.User'
