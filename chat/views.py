@@ -6,6 +6,7 @@ from chat.models import ChatRoom, Message
 from users.models import User
 from book.models import Book
 
+
 #채팅방 생성 API
 @api_view(['POST'])
 def create_chatroom(request):
