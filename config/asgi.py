@@ -17,8 +17,6 @@ from django import setup  # 이 부분을 추가해 주세요.
 # Django 설정 모듈을 환경 변수로 설정
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
-setup()
-
 # ASGI 애플리케이션 설정
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),  # HTTP 요청 처리
