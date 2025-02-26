@@ -3,15 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket 채팅 테스트</title>
+    <title>1대1 채팅 테스트</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #user-selection, #chat-container {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
         #chat-box {
-            width: 100%;
+            width: 80%;
             height: 300px;
             border: 1px solid #ccc;
             overflow-y: scroll;
             padding: 10px;
-            margin-bottom: 10px;
+            margin: 10px auto;
+            text-align: left;
         }
         .message {
             margin-bottom: 5px;
@@ -19,31 +28,50 @@
     </style>
 </head>
 <body>
-    <h2>WebSocket 채팅 테스트</h2>
-    <label for="chatroom-id">채팅방 ID:</label>
-    <input type="number" id="chatroom-id" placeholder="채팅방 ID 입력" required>
-    <button onclick="connectWebSocket()">연결</button>
+    <h2 style="text-align: center;">1대1 채팅 테스트</h2>
 
-    <div id="chat-box"></div>
+    <!-- 사용자 선택 화면 -->
+    <div id="user-selection">
+        <h3>사용자를 선택하세요</h3>
+        <button onclick="selectUser(1)">판매자 (User 1)</button>
+        <button onclick="selectUser(2)">구매자 (User 2)</button>
+    </div>
 
-    <input type="text" id="message-input" placeholder="메시지를 입력하세요">
-    <button onclick="sendMessage()">전송</button>
+    <!-- 채팅 화면 -->
+    <div id="chat-container">
+        <h3>채팅방 (ID: 1)</h3>
+        <p>현재 사용자 ID: <span id="current-user"></span></p>
+        <div id="chat-box"></div>
+
+        <input type="text" id="message-input" placeholder="메시지를 입력하세요">
+        <button onclick="sendMessage()">전송</button>
+        <button onclick="disconnectChat()">채팅 종료</button>
+    </div>
 
     <script>
         let socket;
-        let userId = Math.floor(Math.random() * 1000) + 1; // 테스트용 랜덤 사용자 ID
-        //const backendUrl = "http://52.79.55.92"; ✅ 백엔드 서버 주소
-        const backendUrl =  "http://localhost:8000/";
+        let currentUserId;
+        const chatroomId = 1;  // ✅ 고정된 채팅방 ID
+        const bookId = 1;       // ✅ 고정된 책 ID
+        const sellerId = 1;     // ✅ 판매자 ID
+        const buyerId = 2;      // ✅ 구매자 ID
+        const backendUrl = "http://localhost:8000"; // ✅ 로컬 백엔드 주소
+        const websocketUrl = `ws://localhost:8000/ws/chat/${chatroomId}/`;
+
+        function selectUser(userId) {
+            currentUserId = userId;
+            document.getElementById("current-user").innerText = userId === sellerId ? "판매자 (User 1)" : "구매자 (User 2)";
+
+            // 화면 전환
+            document.getElementById("user-selection").style.display = "none";
+            document.getElementById("chat-container").style.display = "block";
+
+            connectWebSocket();
+        }
 
         function connectWebSocket() {
-            const chatroomId = document.getElementById("chatroom-id").value;
-            if (!chatroomId) {
-                alert("채팅방 ID를 입력하세요.");
-                return;
-            }
-
-            // ✅ WebSocket 연결 (백엔드 서버 주소 적용)
-            socket = new WebSocket(`ws://localhost:8000/ws/chat/${chatroomId}/`);
+            // ✅ WebSocket 연결
+            socket = new WebSocket(websocketUrl);
 
             socket.onopen = function() {
                 console.log("✅ WebSocket 연결 성공!");
@@ -52,7 +80,8 @@
 
             socket.onmessage = function(event) {
                 const data = JSON.parse(event.data);
-                displayMessage(`👤 사용자 ${data.sender_id}: ${data.message}`);
+                const sender = data.sender_id === currentUserId ? "나" : "상대방";
+                displayMessage(`👤 ${sender}: ${data.message}`);
             };
 
             socket.onclose = function() {
@@ -77,7 +106,7 @@
 
             // ✅ 메시지 전송
             socket.send(JSON.stringify({
-                sender_id: userId,
+                sender_id: currentUserId,
                 message: message
             }));
 
@@ -93,6 +122,23 @@
             chatBox.appendChild(messageElement);
             chatBox.scrollTop = chatBox.scrollHeight; // 자동 스크롤
         }
+
+        function disconnectChat() {
+            if (socket) {
+                socket.close();
+            }
+
+            // 화면 초기화 및 사용자 선택 화면으로 이동
+            document.getElementById("chat-box").innerHTML = "";
+            document.getElementById("message-input").value = "";
+            document.getElementById("chat-container").style.display = "none";
+            document.getElementById("user-selection").style.display = "block";
+        }
+
+        // 페이지 로드 시 사용자 선택 화면 보이기
+        window.onload = function() {
+            document.getElementById("user-selection").style.display = "block";
+        };
     </script>
 </body>
 </html>
