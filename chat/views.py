@@ -2,9 +2,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import render
-from backend.chat.models import ChatRoom, Message
-from backend.users.models import User
-from backend.book.models import Book
+from chat.models import ChatRoom, Message
+from users.models import User
+from book.models import Book
 
 #채팅방 생성 API
 @api_view(['POST'])

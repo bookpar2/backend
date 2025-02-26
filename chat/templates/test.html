@@ -32,7 +32,8 @@
     <script>
         let socket;
         let userId = Math.floor(Math.random() * 1000) + 1; // 테스트용 랜덤 사용자 ID
-        const backendUrl = "http://52.79.55.92"; // ✅ 백엔드 서버 주소
+        //const backendUrl = "http://52.79.55.92"; ✅ 백엔드 서버 주소
+        const backendUrl =  "http://localhost:8000/";
 
         function connectWebSocket() {
             const chatroomId = document.getElementById("chatroom-id").value;
@@ -42,7 +43,7 @@
             }
 
             // ✅ WebSocket 연결 (백엔드 서버 주소 적용)
-            socket = new WebSocket(`ws://52.79.55.92/ws/chat/${chatroomId}/`);
+            socket = new WebSocket(`ws://localhost:8000/ws/chat/${chatroomId}/`);
 
             socket.onopen = function() {
                 console.log("✅ WebSocket 연결 성공!");

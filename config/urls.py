@@ -23,4 +23,5 @@ urlpatterns = [
     path('books/', BookListCreateView.as_view(), name='book-list-create'),
     path('books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
     path('api/v1/users/', include('users.urls')),
+    path('', include('chat.urls')),
 ]
