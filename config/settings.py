@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'users',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework.authtoken',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
 ]
@@ -72,6 +73,7 @@ MIDDLEWARE = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
 }
 
@@ -193,6 +195,7 @@ AWS_S3_SIGNATURE_VERSION = env('AWS_S3_SIGNATURE_VERSION', default='s3v4')
 # S3에 static 파일 저장하기
 STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/django/'
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/book/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
