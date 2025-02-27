@@ -19,7 +19,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         chatroom = await self.get_chatroom(self.chatroom_id)
 
         # 현재 사용자가 buyer 또는 seller인지 확인
-        if user not in [chatroom.buyer, chatroom.seller]:
+        if user != chatroom.buyer and user != chatroom.seller:
             await self.send(text_data=json.dumps({"error": "접속 권한이 없습니다."}))
             await self.close(code=4003)  # 권한 없음
             return
@@ -47,33 +47,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({"error": "Invalid JSON format"}))
             return
 
-        sender_id = data.get("sender_id")
         message_content = data.get("message")
+        sender = self.scope["user"]  #클라이언트에서 sender_id를 받지 않고 서버에서 인증된 사용자 사용
 
-        if not sender_id or message_content is None:
-            await self.send(text_data=json.dumps({"error": "Missing sender_id or message"}))
+        if not message_content:
+            await self.send(text_data=json.dumps({"error": "Missing message content"}))
             return
 
         # 숫자 메시지는 문자열로 변환
         if isinstance(message_content, (int, float)):
             message_content = str(message_content)
 
-        # sender_id가 문자열인 경우 UUID 변환 (안전하게 처리)
-        try:
-            sender_id = uuid.UUID(sender_id) if isinstance(sender_id, str) else sender_id
-        except ValueError:
-            await self.send(text_data=json.dumps({"error": "잘못된 sender_id 형식입니다."}))
-            return
-
         # DB에 메시지 저장 (비동기)
-        message = await self.save_message(self.chatroom_id, sender_id, message_content)
+        message = await self.save_message(self.chatroom_id, sender, message_content)
+
+        if message is None:
+            await self.send(text_data=json.dumps({"error": "Message saving failed"}))
+            return
 
         # WebSocket을 통해 메시지 브로드캐스트
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "chat_message",
-                "sender_id": str(sender_id),  # UUID를 문자열로 변환하여 보냄
+                "sender_id": str(sender.id),
                 "message": message.content,
                 "time": message.time.strftime('%Y-%m-%d %H:%M:%S')
             }
@@ -96,16 +93,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return None
 
     @sync_to_async
-    def save_message(self, chatroom_id, sender_id, content):
+    def save_message(self, chatroom_id, sender, content):
         """ DB에 메시지 저장 (비동기) """
         try:
-            # sender_id가 UUID인 경우 변환
-            sender_uuid = uuid.UUID(sender_id) if isinstance(sender_id, str) else sender_id
-            sender = User.objects.get(id=sender_uuid)
-        except (ValueError, ValidationError, User.DoesNotExist):
-            return None  # 존재하지 않는 유저 예외 처리
+            chatroom = ChatRoom.objects.get(id=chatroom_id)
+        except ChatRoom.DoesNotExist:
+            return None  # 채팅방이 존재하지 않으면 메시지 저장 불가
 
-        chatroom = ChatRoom.objects.get(id=chatroom_id)
         message = Message.objects.create(chatRoom=chatroom, sender=sender, content=content)
 
         # 마지막 메시지 업데이트
