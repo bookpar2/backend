@@ -78,6 +78,16 @@ class BookListCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# 유저 별 책 조회(GET)
+class BookListByUser(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """개인 서적 조회 (GET)"""
+        books = Book.objects.filter(seller=request.user).order_by('-created_at')
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)  # 200 OK로 응답
+
 # 특정 책 조회(GET), 수정(PATCH), 삭제(DELETE)
 class BookDetailView(APIView):
     permission_classes = [IsAuthenticated]  # 인증된 유저만 수정/삭제 가능

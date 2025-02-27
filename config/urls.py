@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/books/', BookListCreateView.as_view(), name='book-list-create'),
     path('api/v1/books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
+    path('api/v1/books/user/', BookListCreateView.as_view(), name='book-by-user'),
     path('api/v1/users/', include('users.urls')),
     path('', include('chat.urls')),
 ]
