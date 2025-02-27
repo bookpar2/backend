@@ -16,7 +16,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # 현재 접속한 사용자 가져오기
         user = self.scope["user"]
 
+        print(f"DEBUG: WebSocket 연결된 사용자: {user}, ID: {getattr(user, 'id', 'Anonymous')}")
+
         chatroom = await self.get_chatroom(self.chatroom_id)
+
+        if not chatroom:
+            await self.send(text_data=json.dumps({"error": "채팅방이 존재하지 않습니다."}))
+            await self.close(code=4004)
+            return
 
         # 현재 사용자가 buyer 또는 seller인지 확인
         if user != chatroom.buyer and user != chatroom.seller:
@@ -29,6 +36,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
+        print(f"DEBUG: {user} 님이 {self.room_group_name} 그룹에 추가됨")
 
         await self.accept()
 

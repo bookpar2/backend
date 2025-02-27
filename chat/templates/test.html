@@ -47,7 +47,7 @@
         }
 
         // ✅ WebSocket 연결 (토큰 없이)
-        socket = new WebSocket(`ws://52.79.55.92:8001/ws/chat/${chatroomId}/`);
+        socket = new WebSocket(`ws://52.79.55.92:8001/ws/chat/${chatroomId}/?token=${token}`);
 
         socket.onopen = function () {
             console.log(`✅ WebSocket 연결 성공! 채팅방 ID: ${chatroomId}`);
