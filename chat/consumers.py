@@ -9,8 +9,18 @@ from users.models import User
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        """ WebSocket 연결 시 사용자 인증 및 권한 확인 """
         self.chatroom_id = self.scope['url_route']['kwargs']['chatroom_id']
         self.room_group_name = f"chat_{self.chatroom_id}"
+
+        # 현재 접속한 사용자 가져오기
+        user = self.scope["user"]
+
+        # 현재 사용자가 buyer 또는 seller인지 확인
+        if user not in [chatroom.buyer, chatroom.seller]:
+            await self.send(text_data=json.dumps({"error": "접속 권한이 없습니다."}))
+            await self.close(code=4003)  # 권한 없음
+            return
 
         #WebSocket 그룹 추가
         await self.channel_layer.group_add(
@@ -29,12 +39,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         """ 메시지를 받으면 DB에 저장 후 브로드캐스트 """
-        data = json.loads(text_data)
+        try:
+            data = json.loads(text_data)
+        except json.JSONDecodeError:
+            await self.send(text_data=json.dumps({"error": "Invalid JSON format"}))
+            return
+
         sender_id = data.get("sender_id")
         message_content = data.get("message")
 
-        if not sender_id or not message_content:
+        if not sender_id or message_content is None:
+            await self.send(text_data=json.dumps({"error": "Missing sender_id or message"}))
             return
+
+        # 숫자 메시지는 문자열로 변환
+        if isinstance(message_content, (int, float)):
+            message_content = str(message_content)
 
         # sender_id가 문자열인 경우 UUID 변환 (안전하게 처리)
         try:
