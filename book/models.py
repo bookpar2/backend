@@ -17,7 +17,7 @@ class Book(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='FOR_SALE')  # 거래 상태
     created_at = models.DateTimeField(auto_now_add=True)  # 등록 시간
     updated_at = models.DateTimeField(auto_now=True)  # 수정 시간
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)  # 사용자 정보
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True)  # 사용자 정보
 
     def __str__(self):
         return self.title
