@@ -7,7 +7,7 @@ class ChatRoom(models.Model):
     book = models.ForeignKey(Book, related_name='chat_book', on_delete=models.CASCADE)
     last_message = models.TextField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    seller = models.ForeignKey(User, related_name='chat_seller', on_delete=models.CASCADE)
 
     class Meta:
         constraints = [

@@ -19,20 +19,6 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, school_email, name, student_id, major, password):
-        user = self.create_user(
-            school_email=school_email,
-            name=name,
-            student_id=student_id,
-            major=major,
-            password=password,
-        )
-        user.is_admin = True
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-        return user
-
 
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -45,9 +31,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=100, default="이름")
     student_id = models.CharField(max_length=20, unique=True)
     major = models.CharField(max_length=100, default="미지정")
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
     email_verified = models.BooleanField(default=False)
 
