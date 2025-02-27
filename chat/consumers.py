@@ -16,6 +16,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # 현재 접속한 사용자 가져오기
         user = self.scope["user"]
 
+        chatroom = await self.get_chatroom(self.chatroom_id)
+
         # 현재 사용자가 buyer 또는 seller인지 확인
         if user not in [chatroom.buyer, chatroom.seller]:
             await self.send(text_data=json.dumps({"error": "접속 권한이 없습니다."}))
@@ -84,6 +86,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "message": event["message"],
             "time": event["time"]
         }))
+
+    @sync_to_async
+    def get_chatroom(self, chatroom_id):
+        """ 채팅방 정보 가져오기 """
+        try:
+            return ChatRoom.objects.get(id=chatroom_id)
+        except ChatRoom.DoesNotExist:
+            return None
 
     @sync_to_async
     def save_message(self, chatroom_id, sender_id, content):
