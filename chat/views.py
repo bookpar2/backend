@@ -13,12 +13,19 @@ import uuid
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_chatroom(request):
-    buyer = request.user  # ✅ 현재 로그인한 사용자 (JWT에서 자동 추출)
+    buyer = request.user  #현재 로그인한 사용자 (JWT에서 자동 추출)
     book_id = request.data.get('book_id')
 
     try:
         book = Book.objects.get(id=book_id)
         seller = book.seller
+
+        #구매자와 판매자가 동일하면 채팅방 생성 불가
+        if buyer == seller:
+            return Response(
+                {"error": "자신의 책에 대한 채팅방을 생성할 수 없습니다."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         #기존 채팅방 확인
         chatroom, created = ChatRoom.objects.get_or_create(
