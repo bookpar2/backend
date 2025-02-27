@@ -6,6 +6,7 @@ from django.shortcuts import render
 from chat.models import ChatRoom, Message
 from users.models import User
 from book.models import Book
+import uuid
 
 
 #채팅방 생성 API
