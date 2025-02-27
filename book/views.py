@@ -74,7 +74,7 @@ class BookListCreateView(APIView):
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
             # 유저 정보 자동으로 추가 (현재 로그인한 유저)
-            serializer.save(seller=request.seller)
+            serializer.save(seller=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
