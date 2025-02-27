@@ -80,6 +80,9 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+# CORS 설정
+CORS_ALLOW_ALL_ORIGINS = True
+
 # JWT 설정
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
