@@ -40,13 +40,19 @@
 
     function connectWebSocket() {
         const chatroomId = document.getElementById("chatroom_id").value;
+        const token = localStorage.getItem("jwtToken"); // ✅ JWT 토큰 가져오기
 
         if (!chatroomId || (chatroomId != "3" && chatroomId != "5")) {
             alert("유효한 채팅방 ID를 입력하세요 (3 또는 5)");
             return;
         }
 
-        // ✅ WebSocket 연결 (토큰 없이)
+        if (!token) {
+            alert("JWT 토큰이 없습니다. 콘솔에서 토큰을 먼저 저장하세요.");
+            return;
+        }
+
+        // ✅ WebSocket 연결 (토큰 포함)
         socket = new WebSocket(`ws://52.79.55.92:8001/ws/chat/${chatroomId}/?token=${token}`);
 
         socket.onopen = function () {
