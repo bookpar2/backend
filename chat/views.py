@@ -106,7 +106,7 @@ def get_chatrooms(request):
 
         chatroom_list.append({
             "chatroom_id": chatroom.id,
-            "opponent_name": opponent.username,
+            "opponent_name": opponent.name,
             "book_title": chatroom.book.title,
             "last_message": chatroom.last_message or "",
             "updated_at": chatroom.updated_at.strftime('%Y-%m-%d %H:%M:%S')
