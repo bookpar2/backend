@@ -35,64 +35,65 @@
     <input type="text" id="message" placeholder="메시지 입력">
     <button onclick="sendMessage()">전송</button>
 
-    <script>
-        let socket;
+<script>
+    let socket;
 
-        function connectWebSocket() {
-            const chatroomId = document.getElementById("chatroom_id").value;
-            const token = localStorage.getItem("jwtToken"); // ✅ 콘솔에서 저장한 토큰 가져오기
+    function connectWebSocket() {
+        const chatroomId = document.getElementById("chatroom_id").value;
+        const token = localStorage.getItem("jwtToken"); // ✅ JWT 토큰 가져오기
 
-            if (!chatroomId || (chatroomId != "3" && chatroomId != "5")) {
-                alert("유효한 채팅방 ID를 입력하세요 (3 또는 5)");
-                return;
-            }
-
-            if (!token) {
-                alert("JWT 토큰이 없습니다. 콘솔에서 토큰을 먼저 저장하세요.");
-                return;
-            }
-
-            // ✅ WebSocket 연결 (토큰 포함)
-            socket = new WebSocket(`ws://your-server.com/ws/chat/${chatroomId}/?token=${token}`);
-
-            socket.onopen = function () {
-                console.log(`✅ WebSocket 연결 성공! 채팅방 ID: ${chatroomId}`);
-                document.getElementById("chat").innerHTML += "<p><b>✅ 채팅방에 입장했습니다.</b></p>";
-            };
-
-            socket.onmessage = function (event) {
-                const data = JSON.parse(event.data);
-                document.getElementById("chat").innerHTML += `<p><b>${data.sender_id}:</b> ${data.message}</p>`;
-            };
-
-            socket.onclose = function (event) {
-                console.log(`❌ WebSocket 연결 종료 (${event.code}):`, event.reason);
-                document.getElementById("chat").innerHTML += "<p><b>❌ 연결이 종료되었습니다.</b></p>";
-            };
-
-            socket.onerror = function (error) {
-                console.error("⚠️ WebSocket 오류 발생:", error);
-            };
+        if (!chatroomId || (chatroomId != "3" && chatroomId != "5")) {
+            alert("유효한 채팅방 ID를 입력하세요 (3 또는 5)");
+            return;
         }
 
-        function sendMessage() {
-            const message = document.getElementById("message").value;
-
-            if (!message.trim()) {
-                alert("메시지를 입력하세요.");
-                return;
-            }
-
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                const data = { message: message };
-                socket.send(JSON.stringify(data));
-                document.getElementById("chat").innerHTML += `<p><b>나:</b> ${message}</p>`;
-                document.getElementById("message").value = "";
-            } else {
-                alert("WebSocket 연결이 닫혀 있습니다. 다시 연결하세요.");
-            }
+        if (!token) {
+            alert("JWT 토큰이 없습니다. 콘솔에서 토큰을 먼저 저장하세요.");
+            return;
         }
-    </script>
+
+        // ✅ WebSocket 연결 (토큰 포함)
+        socket = new WebSocket(`ws://52.79.55.92:8001/ws/chat/${chatroomId}/?token=${token}`);
+
+        socket.onopen = function () {
+            console.log(`✅ WebSocket 연결 성공! 채팅방 ID: ${chatroomId}`);
+            document.getElementById("chat").innerHTML += "<p><b>✅ 채팅방에 입장했습니다.</b></p>";
+        };
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            document.getElementById("chat").innerHTML += `<p><b>${data.sender_id}:</b> ${data.message}</p>`;
+        };
+
+        socket.onclose = function (event) {
+            console.log(`❌ WebSocket 연결 종료 (${event.code}):`, event.reason);
+            document.getElementById("chat").innerHTML += "<p><b>❌ 연결이 종료되었습니다.</b></p>";
+        };
+
+        socket.onerror = function (error) {
+            console.error("⚠️ WebSocket 오류 발생:", error);
+        };
+    }
+
+    function sendMessage() {
+        const message = document.getElementById("message").value;
+
+        if (!message.trim()) {
+            alert("메시지를 입력하세요.");
+            return;
+        }
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            const data = { message: message };
+            socket.send(JSON.stringify(data));
+            document.getElementById("chat").innerHTML += `<p><b>나:</b> ${message}</p>`;
+            document.getElementById("message").value = "";
+        } else {
+            alert("WebSocket 연결이 닫혀 있습니다. 다시 연결하세요.");
+        }
+    }
+</script>
+
 
 </body>
 </html>
