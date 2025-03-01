@@ -57,7 +57,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from .models import Book
-from .serializers import BookSerializer
+from .serializers import BookSerializer, UserSerializer
 from elasticsearch_dsl.query import Bool, MultiMatch
 from .search import BookDocument
 
@@ -87,8 +87,9 @@ class BookListByUser(APIView):
     def get(self, request, *args, **kwargs):
         """개인 서적 조회 (GET)"""
         books = Book.objects.filter(seller=request.user).order_by('-created_at')
-        serializer = BookSerializer(books, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)  # 200 OK로 응답
+        book_serializer = BookSerializer(books, many=True)
+        sellers = UserSerializer(request.user)
+        return Response( {'sellers': sellers.data, 'books': book_serializer.data}, status=status.HTTP_200_OK)  # 200 OK로 응답
 
 # 특정 책 조회(GET), 수정(PATCH), 삭제(DELETE)
 class BookDetailView(APIView):
