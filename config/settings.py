@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
+    'django_elasticsearch_dsl',
 ]
 
 ASGI_APPLICATION = 'config.asgi.application'
@@ -215,3 +216,24 @@ MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaw
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Elasticsearch 설정 추가
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': ['http://localhost:9200'],  # Elasticsearch 서버 URL
+    }
+}
+
+# edge_ngram 분석기 설정 (여기서는 전공에 대해 edge_ngram을 사용)
+ELASTICSEARCH_DSL['analyzers'] = {
+    'edge_ngram_analyzer': {
+        'type': 'custom',
+        'tokenizer': 'edge_ngram_tokenizer',
+    },
+    'edge_ngram_tokenizer': {
+        'type': 'edge_ngram',
+        'min_gram': 2,
+        'max_gram': 25,
+        'token_chars': ['letter', 'digit']
+    }
+}
