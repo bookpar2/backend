@@ -84,9 +84,16 @@ class BookListByUser(APIView):
 
     def get(self, request, *args, **kwargs):
         """개인 서적 조회 (GET)"""
-        books = Book.objects.filter(seller=request.user).order_by('-created_at')
-        serializer = BookSerializer(books, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)  # 200 OK로 응답
+        books = Book.objects.filter(seller=request.user).annotate(
+            for_sale_priority=Case(
+                When(status='FOR_SALE', then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField()
+            )
+        ).order_by('for_sale_priority', '-created_at')  # FOR_SALE이 우선, 최신순 정렬
+        book_serializer = BookSerializer(books, many=True)
+        sellers = UserSerializer(request.user)
+        return Response( {'sellers': sellers.data, 'books': book_serializer.data}, status=status.HTTP_200_OK)  # 200 OK로 응답
 
 # 특정 책 조회(GET), 수정(PATCH), 삭제(DELETE)
 class BookDetailView(APIView):
