@@ -229,17 +229,3 @@ ELASTICSEARCH_DSL = {
         'hosts': ['http://localhost:9200'],  # Elasticsearch 서버 URL
     }
 }
-
-# edge_ngram 분석기 설정 (여기서는 전공에 대해 edge_ngram을 사용)
-ELASTICSEARCH_DSL['analyzers'] = {
-    'edge_ngram_analyzer': {
-        'type': 'custom',
-        'tokenizer': 'edge_ngram_tokenizer',
-    },
-    'edge_ngram_tokenizer': {
-        'type': 'edge_ngram',
-        'min_gram': 2,
-        'max_gram': 25,
-        'token_chars': ['letter', 'digit']
-    }
-}
