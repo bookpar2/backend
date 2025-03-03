@@ -9,7 +9,7 @@ class Book(models.Model):
     ]
 
     title = models.CharField(max_length=50)  # 책 제목
-    author = models.CharField(max_length=50)  # 저자
+    chatLink = models.TextField(max_length=500)  # 오픈채팅 링크
     price = models.IntegerField()  # 가격
     description = models.TextField(blank=True, null=True)  # 설명
     image_url = models.CharField(max_length=200, blank=True, null=True)  # S3 이미지 URL

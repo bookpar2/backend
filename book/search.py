@@ -5,7 +5,6 @@ from .models import Book
 @registry.register_document
 class BookDocument(Document):
     title = fields.TextField(analyzer='edge_ngram_analyzer', search_analyzer='edge_ngram_analyzer')
-    author = fields.TextField(analyzer='edge_ngram_analyzer', search_analyzer='edge_ngram_analyzer')
     description = fields.TextField(analyzer='edge_ngram_analyzer', search_analyzer='edge_ngram_analyzer')
     major = fields.TextField(analyzer='edge_ngram_analyzer', search_analyzer='edge_ngram_analyzer')
 
