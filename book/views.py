@@ -42,11 +42,11 @@ class BookListCreateView(APIView):
         )
 
         # 파일명 유니크하게 생성
-        s3_file_name = f"books/{uuid4()}_{file.name}"
+        s3_file_name = f"image/{uuid4()}_{file.name}"
         s3.upload_fileobj(file, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
 
         # S3 URL 생성
-        file_url = f"{settings.MEDIA_URL}{s3_file_name}"
+        file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
 
         # DB에 저장
         book_data = request.data.copy()
