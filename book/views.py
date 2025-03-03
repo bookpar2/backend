@@ -46,7 +46,7 @@ class BookListCreateView(APIView):
         s3.upload_fileobj(file, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
 
         # S3 URL 생성
-        file_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_file_name}"
+        file_url = f"{settings.MEDIA_URL}{s3_file_name}"
 
         # DB에 저장
         book_data = request.data.copy()

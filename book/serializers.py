@@ -4,7 +4,7 @@ from users.models import User
 
 class BookSerializer(serializers.ModelSerializer):
     seller_name = serializers.CharField(source='seller.name', read_only=True)
-    image_url = serializers.URLField(required=False)
+    image_url = serializers.CharField(required=False, allow_blank=True)
     
     class Meta:
         model = Book
