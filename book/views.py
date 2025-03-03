@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Book
 from .serializers import BookSerializer, UserSerializer
 from elasticsearch_dsl.query import Bool, MultiMatch
@@ -10,6 +11,7 @@ from django.db.models import Case, When, Value, IntegerField
 
 # 서적 전체 조회(GET) 및 서적 등록(POST) 
 class BookListCreateView(APIView):
+    parser_classes = [MultiPartParser, FormParser]  # 파일 업로드를 위한 설정
     def get_permissions(self):
         """요청 방식에 따라 다른 권한 부여"""
         if self.request.method == 'GET':
