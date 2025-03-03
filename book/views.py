@@ -53,8 +53,7 @@
 #         )
 
 from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
 from .models import Book
 from .serializers import BookSerializer
@@ -65,7 +64,8 @@ class BookListCreateView(generics.ListCreateAPIView):
     serializer_class = BookSerializer
     filter_backends = [SearchFilter]
     search_fields = ['title', 'author', 'major']
-    
+    permission_classes = [AllowAny]  # 로그인 없이 접근 가능
+
     def get(self, request, *args, **kwargs):
         """서적 전체 조회 (GET)"""
         return self.list(request, *args, **kwargs)
@@ -78,7 +78,8 @@ class BookListCreateView(generics.ListCreateAPIView):
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    
+    permission_classes = [AllowAny]  # 로그인 없이 접근 가능
+
     def get(self, request, *args, **kwargs):
         """개별 서적 조회 (GET)"""
         return self.retrieve(request, *args, **kwargs)
