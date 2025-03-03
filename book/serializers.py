@@ -3,11 +3,11 @@ from .models import Book
 from users.models import User
 
 class BookSerializer(serializers.ModelSerializer):
-    seller = serializers.CharField(source='seller.name', read_only=True)
+    seller_name = serializers.CharField(source='seller.name', read_only=True)
     
     class Meta:
         model = Book
-        fields = ['id', 'title', 'chatLink', 'price', 'description', 'image_url', 'major', 'status', 'created_at', 'updated_at', 'seller']
+        fields = ['id', 'title', 'chatLink', 'price', 'description', 'image_url', 'major', 'status', 'created_at', 'updated_at', 'seller', 'seller_name']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 class UserSerializer(serializers.ModelSerializer):
