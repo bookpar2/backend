@@ -4,6 +4,8 @@ from users.models import User
 
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
+        seller = serializers.CharField(source='seller.name', read_only=True)
+        
         model = Book
         fields = ['id', 'title', 'chatLink', 'price', 'description', 'image_url', 'major', 'status', 'created_at', 'updated_at', 'seller']
         read_only_fields = ['id', 'created_at', 'updated_at']
