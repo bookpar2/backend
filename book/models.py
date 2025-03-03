@@ -12,7 +12,7 @@ class Book(models.Model):
     chatLink = models.TextField(max_length=500)  # 오픈채팅 링크
     price = models.IntegerField()  # 가격
     description = models.TextField(blank=True, null=True)  # 설명
-    image = models.ImageField(upload_to='books/', blank=True, null=True)  # 변경: 이미지 URL이 아니라 직접 파일을 받음
+    image_url = models.URLField(max_length=500, blank=True, null=True)  #URL 저장 방식으로 변경
     major = models.CharField(max_length=50)  # 전공
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='FOR_SALE')  # 거래 상태
     created_at = models.DateTimeField(auto_now_add=True)  # 등록 시간

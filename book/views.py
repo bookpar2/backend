@@ -1,3 +1,5 @@
+import boto3
+from django.conf import settings
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,6 +10,7 @@ from .serializers import BookSerializer, UserSerializer
 from elasticsearch_dsl.query import Bool, MultiMatch
 from .search import BookDocument
 from django.db.models import Case, When, Value, IntegerField
+from uuid import uuid4
 
 # 서적 전체 조회(GET) 및 서적 등록(POST) 
 class BookListCreateView(APIView):
@@ -26,11 +29,33 @@ class BookListCreateView(APIView):
     
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
-        serializer = BookSerializer(data=request.data)
+        file = request.FILES.get("image")  # 업로드된 파일 받기
+        if not file:
+            return Response({"error": "No image uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # S3에 업로드
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME,
+        )
+
+        # 파일명 유니크하게 생성
+        s3_file_name = f"books/{uuid4()}_{file.name}"
+        s3.upload_fileobj(file, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
+
+        # S3 URL 생성
+        file_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_file_name}"
+
+        # DB에 저장
+        book_data = request.data.copy()
+        book_data["image_url"] = file_url  # URL 저장
+        serializer = BookSerializer(data=book_data)
         if serializer.is_valid():
-            # 유저 정보 자동으로 추가 (현재 로그인한 유저)
-            serializer.save(seller=request.user)
+            serializer.save(seller=request.user)  # 현재 로그인한 유저 저장
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 유저 별 책 조회(GET)
