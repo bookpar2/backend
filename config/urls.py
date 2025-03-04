@@ -16,10 +16,11 @@
 # """
 from django.contrib import admin
 from django.urls import path, include
-from book.views import BookListCreateView, BookDetailView, BookListByUser, BookSearchView
+from book.views import BookListCreateView, BookDetailView, BookListByUser, BookSearchView, BookListAllView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v1/books/', BookListAllView.as_view(), name='all-book-list'),
     path('api/v1/books/', BookListCreateView.as_view(), name='book-list-create'),
     path('api/v1/books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
     path('api/v1/books/user/', BookListByUser.as_view(), name='book-by-user'),

@@ -13,20 +13,19 @@ from django.db.models import Case, When, Value, IntegerField
 from uuid import uuid4
 import tempfile
 
-# 서적 전체 조회(GET) 및 서적 등록(POST) 
-class BookListCreateView(APIView):
-    parser_classes = [MultiPartParser, FormParser]  # 파일 업로드를 위한 설정
-    def get_permissions(self):
-        """요청 방식에 따라 다른 권한 부여"""
-        if self.request.method == 'GET':
-            return [AllowAny()]  # get은 토큰 필요 없음
-        else : return [IsAuthenticated()]
+# 서적 전체 조회(GET)
+class BookListAllView(APIView):
+    parser_classes = [AllowAny]  # 파일 업로드를 위한 설정
 
     def get(self, request, *args, **kwargs):
         """서적 전체 조회 (GET)"""
         books = Book.objects.all().order_by('-created_at')
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
+
+# 서적 전체 조회(GET) 및 서적 등록(POST) 
+class BookListCreateView(APIView):
+    parser_classes = [MultiPartParser, FormParser, IsAuthenticated]  # 파일 업로드를 위한 설정
     
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
