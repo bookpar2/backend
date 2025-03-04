@@ -22,7 +22,6 @@ class Migration(migrations.Migration):
                 ('chatLink', models.TextField(max_length=500)),
                 ('price', models.IntegerField()),
                 ('description', models.TextField(blank=True, null=True)),
-                ('image_url', models.TextField(blank=True, null=True)),
                 ('major', models.CharField(max_length=50)),
                 ('status', models.CharField(choices=[('FOR_SALE', '판매 중'), ('IN_PROGRESS', '거래 중'), ('COMPLETED', '거래 완료')], default='FOR_SALE', max_length=20)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),

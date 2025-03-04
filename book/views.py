@@ -23,17 +23,17 @@ class BookListAllView(APIView):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
-# 서적 등록(POST) 
+# 서적 등록(POST)
 class BookListCreateView(APIView):
     parser_classes = [MultiPartParser, FormParser, IsAuthenticated]  # 파일 업로드를 위한 설정
-    
+
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
         files = request.FILES.getlist("images")  # 업로드된 파일들 받기
         if not files:
             return Response({"error": "No images uploaded"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 임시 파일을 생성하여 파일 객체 저장
+        # S3 클라이언트 설정
         s3 = boto3.client(
             "s3",
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -61,7 +61,7 @@ class BookListCreateView(APIView):
                 file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
                 image_urls.append(file_url)
 
-        # DB에 저장
+        # DB에 서적 데이터 저장
         book_data = request.data.copy()
         serializer = BookSerializer(data=book_data)
         if serializer.is_valid():
@@ -71,9 +71,11 @@ class BookListCreateView(APIView):
             for image_url in image_urls:
                 BookImage.objects.create(book=book, image_url=image_url)
 
+            # 책 정보를 포함한 응답 반환
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # 유저 별 책 조회(GET)
 class BookListByUser(APIView):
