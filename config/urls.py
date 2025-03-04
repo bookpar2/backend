@@ -20,7 +20,7 @@ from book.views import BookListCreateView, BookDetailView, BookListByUser, BookS
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/books/', BookListAllView.as_view(), name='all-book-list'),
+    path('api/v1/books/all', BookListAllView.as_view(), name='all-book-list'),
     path('api/v1/books/', BookListCreateView.as_view(), name='book-list-create'),
     path('api/v1/books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
     path('api/v1/books/user/', BookListByUser.as_view(), name='book-by-user'),
