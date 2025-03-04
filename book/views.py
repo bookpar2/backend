@@ -11,6 +11,7 @@ from elasticsearch_dsl.query import Bool, MultiMatch
 from .search import BookDocument
 from django.db.models import Case, When, Value, IntegerField
 from uuid import uuid4
+import tempfile
 
 # 서적 전체 조회(GET) 및 서적 등록(POST) 
 class BookListCreateView(APIView):
@@ -33,30 +34,40 @@ class BookListCreateView(APIView):
         if not file:
             return Response({"error": "No image uploaded"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # S3에 업로드
-        s3 = boto3.client(
-            "s3",
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_S3_REGION_NAME,
-        )
+        # 임시 파일을 생성하여 파일 객체 저장
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            for chunk in file.chunks():
+                tmp_file.write(chunk)
+            tmp_file.close()  # 파일을 닫아줍니다.
 
-        # 파일명 유니크하게 생성
-        s3_file_name = f"image/{uuid4()}_{file.name}"
-        s3.upload_fileobj(file, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
+            # S3에 업로드
+            s3 = boto3.client(
+                "s3",
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME,
+            )
 
-        # S3 URL 생성
-        file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
+            # 파일명 유니크하게 생성
+            s3_file_name = f"image/{uuid4()}_{file.name}"
 
-        # DB에 저장
-        book_data = request.data.copy()
-        book_data["image_url"] = file_url  # URL 저장
-        serializer = BookSerializer(data=book_data)
-        if serializer.is_valid():
-            serializer.save(seller=request.user)  # 현재 로그인한 유저 저장
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # 임시 파일을 S3에 업로드
+            with open(tmp_file.name, 'rb') as file_data:
+                s3.upload_fileobj(file_data, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
+
+            # S3 URL 생성
+            file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
+
+            # DB에 저장
+            book_data = request.data.copy()
+            book_data["image_url"] = file_url  # URL 저장
+            serializer = BookSerializer(data=book_data)
+            if serializer.is_valid():
+                serializer.save(seller=request.user)  # 현재 로그인한 유저 저장
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # 유저 별 책 조회(GET)
 class BookListByUser(APIView):
@@ -112,7 +123,6 @@ class BookSearchView(APIView):
         search_query = Bool(
             should=[
                 MultiMatch(query=query, fields=['title']),
-                MultiMatch(query=query, fields=['author']),
                 MultiMatch(query=query, fields=['description']),
                 MultiMatch(query=query, fields=['major'])
             ],
