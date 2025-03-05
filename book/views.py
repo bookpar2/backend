@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Book, BookImage
-from .serializers import BookSerializer, UserSerializer
+from .serializers import BookSerializer, UserSerializer, BookImageSerializer
 from elasticsearch_dsl.query import Bool, MultiMatch
 from .search import BookDocument
 from django.db.models import Case, When, Value, IntegerField
@@ -61,9 +61,10 @@ class BookListCreateView(APIView):
             file_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_file_name}"
             image_urls.append(file_url)
 
-        # DB에 서적 데이터 저장
-        serializer = BookSerializer(data=request.data)
+        # 서적 데이터 저장
+        serializer = BookImageSerializer(data=request.data)
         if serializer.is_valid():
+            # 서적 정보 저장
             book = serializer.save(seller=request.user)  # 현재 로그인한 유저 저장
 
             # 여러 이미지 저장
