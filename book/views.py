@@ -30,6 +30,13 @@ class BookListCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
+        status = request.data.get('status')
+        print(status)
+        if status:
+            # 이중 따옴표가 포함되어 있다면 제거
+            request.data['status'] = status.strip('"')
+
+
         files = request.data.getlist('images')
 
         if not files:
