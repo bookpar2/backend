@@ -6,13 +6,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from .models import Book, BookImage
 from .serializers import BookSerializer, UserSerializer, BookImageSerializer
 from elasticsearch_dsl.query import Bool, MultiMatch
 from .search import BookDocument
 from django.db.models import Case, When, Value, IntegerField
 from uuid import uuid4
-import tempfile
 
 # 서적 전체 조회(GET)
 class BookListAllView(APIView):
@@ -27,6 +27,7 @@ class BookListAllView(APIView):
 class BookListCreateView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]  # 인증된 사용자만 가능
+    authentication_classes = [SessionAuthentication, BasicAuthentication]  # 인증 클래스 추가
 
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
