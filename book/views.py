@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from .models import Book, BookImage
 from .serializers import BookSerializer, UserSerializer, BookCreateSerializer
 from elasticsearch_dsl.query import Bool, MultiMatch
@@ -29,6 +28,13 @@ class BookListCreateView(APIView):
     permission_classes = [IsAuthenticated] 
 
     def post(self, request, *args, **kwargs):
+        # status 필드를 가져올 때 변수명 변경
+        book_status = request.data.get('status')
+        
+        if book_status:
+            # 이중 따옴표가 포함되어 있다면 제거
+            request.data['status'] = book_status.strip('"')
+
         """서적 등록 기능 (POST)"""
         files = request.data.getlist('images')
 
