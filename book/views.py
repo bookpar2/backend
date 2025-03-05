@@ -44,18 +44,18 @@ class BookListCreateView(APIView):
 
         # 파일 하나씩 처리
         for file in files:
-            # 파일명 유니크하게 생성
-            s3_file_name = f"image/{uuid4()}_{file.name}"
-
-            # 파일을 S3에 직접 업로드
             try:
+                # 파일명 유니크하게 생성
+                s3_file_name = f"image/{uuid4()}_{file.name}"
+
+                # S3에 파일을 직접 업로드
                 s3.upload_fileobj(file, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
+
+                # S3 URL 생성
+                file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
+                image_urls.append(file_url)
             except Exception as e:
                 return Response({"error": f"Failed to upload file: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            # S3 URL 생성
-            file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
-            image_urls.append(file_url)
 
         # DB에 서적 데이터 저장
         book_data = request.data.copy()  # 파일 데이터는 제외
