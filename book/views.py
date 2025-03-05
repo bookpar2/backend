@@ -26,7 +26,6 @@ class BookListAllView(APIView):
 
 class BookListCreateView(APIView):
     parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAuthenticated]  # 인증된 사용자만 가능
     authentication_classes = [SessionAuthentication, BasicAuthentication]  # 인증 클래스 추가
 
     def post(self, request, *args, **kwargs):
