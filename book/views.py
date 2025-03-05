@@ -26,11 +26,10 @@ class BookListAllView(APIView):
 
 class BookListCreateView(APIView):
     parser_classes = [MultiPartParser, FormParser]
-    authentication_classes = [SessionAuthentication, BasicAuthentication]  # 인증 클래스 추가
+    permission_classes = [IsAuthenticated] 
 
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
-        # 요청에서 'images' 데이터를 받아옴
         files = request.data.getlist('images')
 
         if not files:
@@ -60,15 +59,21 @@ class BookListCreateView(APIView):
             # S3 URL 생성
             file_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_file_name}"
             image_urls.append(file_url)
+        
+        # 시리얼라이저 사용하여 서적 데이터 저장
+        request.data['images'] = image_urls
 
-        # 서적 데이터 저장
-        data = {**request.data, 'images': image_urls}  # 이미지 URLs를 그대로 추가
+        serializer = BookCreateSerializer(data=request.data)
+        print("Data to be saved:", serializer)
 
         # 서적 정보 저장
-        serializer = BookCreateSerializer(data=data)
         if serializer.is_valid():
             # 서적 정보 저장
             book = serializer.save(seller=request.user)  # 현재 로그인한 유저 저장
+
+            # 개별적으로 BookImage 객체 생성
+            for url in image_urls:
+                BookImage.objects.create(book=book, image_url=url)
 
             # 책 정보를 포함한 응답 반환
             return Response(serializer.data, status=status.HTTP_201_CREATED)
