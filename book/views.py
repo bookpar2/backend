@@ -30,7 +30,9 @@ class BookListCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
-        files = request.FILES.getlist("images")  # 업로드된 파일들 받기
+        # 요청에서 'files' 데이터를 받아옴
+        files = request.data.getlist('files')  # 'files'라는 키로 파일 목록을 받음
+
         if not files:
             return Response({"error": "No images uploaded"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -60,8 +62,7 @@ class BookListCreateView(APIView):
             image_urls.append(file_url)
 
         # DB에 서적 데이터 저장
-        book_data = request.data.copy()
-        serializer = BookSerializer(data=book_data)
+        serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
             book = serializer.save(seller=request.user)  # 현재 로그인한 유저 저장
 
