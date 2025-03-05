@@ -23,9 +23,18 @@ class BookListAllView(APIView):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
-# 서적 등록(POST)
+import boto3
+from uuid import uuid4
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.conf import settings
+from .serializers import BookSerializer
+from .models import BookImage
+
 class BookListCreateView(APIView):
-    parser_classes = [MultiPartParser, FormParser, IsAuthenticated]  # 파일 업로드를 위한 설정
+    parser_classes = [MultiPartParser, FormParser]  # 파일 업로드를 위한 설정
 
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
@@ -45,21 +54,15 @@ class BookListCreateView(APIView):
 
         # 파일 하나씩 처리
         for file in files:
-            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-                for chunk in file.chunks():
-                    tmp_file.write(chunk)
-                tmp_file.close()
+            # 파일명 유니크하게 생성
+            s3_file_name = f"image/{uuid4()}_{file.name}"
 
-                # 파일명 유니크하게 생성
-                s3_file_name = f"image/{uuid4()}_{file.name}"
+            # 파일을 S3에 직접 업로드
+            s3.upload_fileobj(file, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
 
-                # 임시 파일을 S3에 업로드
-                with open(tmp_file.name, 'rb') as file_data:
-                    s3.upload_fileobj(file_data, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
-
-                # S3 URL 생성
-                file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
-                image_urls.append(file_url)
+            # S3 URL 생성
+            file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
+            image_urls.append(file_url)
 
         # DB에 서적 데이터 저장
         book_data = request.data.copy()
