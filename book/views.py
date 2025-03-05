@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from .models import Book, BookImage
-from .serializers import BookSerializer, UserSerializer, BookImageSerializer
+from .serializers import BookSerializer, UserSerializer, BookCreateSerializer
 from elasticsearch_dsl.query import Bool, MultiMatch
 from .search import BookDocument
 from django.db.models import Case, When, Value, IntegerField
@@ -30,7 +30,7 @@ class BookListCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
         """서적 등록 기능 (POST)"""
-        # 요청에서 'files' 데이터를 받아옴
+        # 요청에서 'images' 데이터를 받아옴
         files = request.data.getlist('images')
 
         if not files:
@@ -62,16 +62,13 @@ class BookListCreateView(APIView):
             image_urls.append(file_url)
 
         # 서적 데이터 저장
-        data = {**request.data, 'images': []}
-        serializer = BookImageSerializer(data=data)
+        data = {**request.data, 'images': image_urls}  # 이미지 URLs를 그대로 추가
+
+        # 서적 정보 저장
+        serializer = BookCreateSerializer(data=data)
         if serializer.is_valid():
             # 서적 정보 저장
             book = serializer.save(seller=request.user)  # 현재 로그인한 유저 저장
-
-             # 여러 이미지 저장
-            for image_url in image_urls:
-                # BookImage 객체 생성하여 image_url 추가
-                BookImage.objects.create(book=book, image_url=image_url)
 
             # 책 정보를 포함한 응답 반환
             return Response(serializer.data, status=status.HTTP_201_CREATED)
