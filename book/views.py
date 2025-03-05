@@ -23,16 +23,6 @@ class BookListAllView(APIView):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
-import boto3
-from uuid import uuid4
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.parsers import MultiPartParser, FormParser
-from django.conf import settings
-from .serializers import BookSerializer
-from .models import BookImage
-
 class BookListCreateView(APIView):
     parser_classes = [MultiPartParser, FormParser]  # 파일 업로드를 위한 설정
 
