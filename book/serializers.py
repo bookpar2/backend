@@ -6,6 +6,9 @@ class BookImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookImage
         fields = ['image_url']
+        extra_kwargs = {
+            'image_url': {'required': False}
+        }
 
 class BookSerializer(serializers.ModelSerializer):
     seller_name = serializers.CharField(source='seller.name', read_only=True)
