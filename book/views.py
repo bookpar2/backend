@@ -45,7 +45,9 @@ class BookListCreateView(APIView):
         image_urls = []
 
         for file in files:
-            file_stream = io.BytesIO(file.read())  # 파일을 메모리에서 읽음
+            # 파일을 메모리에서 읽음
+            file_stream = io.BytesIO(file.read())
+            file_stream.seek(0)  # 파일 포인터를 처음으로 이동
 
             # 파일명 유니크하게 생성
             s3_file_name = f"image/{uuid4()}_{file.name}"
@@ -54,7 +56,7 @@ class BookListCreateView(APIView):
             s3.upload_fileobj(file_stream, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
 
             # S3 URL 생성
-            file_url = f"{settings.MEDIA_URL}{s3_file_name.split('/')[-1]}"
+            file_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_file_name}"
             image_urls.append(file_url)
 
         # DB에 서적 데이터 저장
