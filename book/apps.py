@@ -8,4 +8,4 @@ class BookConfig(AppConfig):
     def ready(self):
         connections.create_connection(hosts=["http://localhost:9200"])
         from book.signals import index_existing_books
-        index_existing_books()
+        # index_existing_books()
