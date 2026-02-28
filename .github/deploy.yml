@@ -1,0 +1,95 @@
+name: bookpar2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  backend-deploy:
+    name: Deploy Django Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: SSH to EC2 and Deploy
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
+          AWS_S3_REGION_NAME: ${{ secrets.AWS_S3_REGION_NAME}}
+          AWS_S3_SIGNATURE_VERSION: ${{ secrets.AWS_S3_SIGNATURE_VERSION}}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          AWS_STORAGE_BUCKET_NAME: ${{ secrets.AWS_STORAGE_BUCKET_NAME}}
+          IMAGE_BUCKET_NAME: ${{ secrets.IMAGE_BUCKET_NAME }}
+
+        run: |
+          # SSH 키 설정
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+            set -e  # 오류 발생 시 스크립트 중단
+            
+            # 환경 변수 설정
+            export DATABASE_URL="${{ secrets.DATABASE_URL }}"
+            export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
+            export AWS_S3_REGION_NAME="${{ secrets.AWS_S3_REGION_NAME }}"
+            export AWS_S3_SIGNATURE_VERSION="${{ secrets.AWS_S3_SIGNATURE_VERSION }}"
+            export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            export AWS_STORAGE_BUCKET_NAME="${{ secrets.AWS_STORAGE_BUCKET_NAME }}"
+            export IMAGE_BUCKET_NAME="${{ secrets.IMAGE_BUCKET_NAME }}"
+
+            # 백엔드 디렉토리 이동
+            cd /home/ubuntu/docker/backend
+
+            # 최신 코드 가져오기
+            git pull origin main
+
+            # Python 가상환경 설정
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+            source venv/bin/activate
+
+            # 종속성 설치
+            pip install --upgrade pip
+            pip install -r requirements.txt
+
+            # .env 파일 생성 (Django 환경 변수)
+            echo "DATABASE_URL=$DATABASE_URL" > .env
+            echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env
+            echo "AWS_S3_REGION_NAME=$AWS_S3_REGION_NAME" >> .env
+            echo "AWS_S3_SIGNATURE_VERSION=$AWS_S3_SIGNATURE_VERSION" >> .env
+            echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env
+            echo "AWS_STORAGE_BUCKET_NAME=$AWS_STORAGE_BUCKET_NAME" >> .env
+            echo "IMAGE_BUCKET_NAME=$IMAGE_BUCKET_NAME" >> .env
+
+            # Django 마이그레이션 실행
+            python manage.py migrate
+
+            # # 정적 파일 수집
+            # python manage.py collectstatic --noinput
+
+            # MySQL 실행 확인 및 시작
+            if ! systemctl is-active --quiet mysql; then
+              echo "Starting MySQL..."
+              sudo systemctl start mysql
+            fi
+
+            # Gunicorn 실행
+            sudo systemctl restart gunicorn
+
+            # Nginx 재시작
+            sudo systemctl restart nginx
+          EOF
