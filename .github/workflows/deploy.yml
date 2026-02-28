@@ -62,9 +62,9 @@ jobs:
             fi
             source venv/bin/activate
 
-            # 종속성 설치
-            pip install --upgrade pip
-            pip install -r requirements.txt
+            # # 종속성 설치
+            # pip install --upgrade pip
+            # pip install -r requirements.txt
 
             # .env 파일 생성 (Django 환경 변수)
             echo "DATABASE_URL=$DATABASE_URL" > .env
