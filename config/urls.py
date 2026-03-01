@@ -16,6 +16,7 @@
 # """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
 from book.views import BookListCreateView, BookDetailView, BookListByUser, BookListAllView
 
 urlpatterns = [
@@ -26,5 +27,6 @@ urlpatterns = [
     path('api/v1/books/user/', BookListByUser.as_view(), name='book-by-user'),
     # path('api/v1/search/', BookSearchView.as_view(), name='search_books'),
     path('api/v1/users/', include('users.urls')),
-    path('', include('chat.urls')),
+    path('/chat', include('chat.urls')),
+    path('', lambda request: HttpResponse("Hello, World!"), name='hello-world'),
 ]
