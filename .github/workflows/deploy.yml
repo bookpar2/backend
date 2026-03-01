@@ -92,7 +92,7 @@ jobs:
             fi
 
             # Gunicorn 실행
-            sudo systemctl reload gunicorn
+            sudo systemctl restart gunicorn
 
             # Nginx 재시작
             sudo systemctl restart nginx
