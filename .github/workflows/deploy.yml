@@ -31,6 +31,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           AWS_STORAGE_BUCKET_NAME: ${{ secrets.AWS_STORAGE_BUCKET_NAME}}
           IMAGE_BUCKET_NAME: ${{ secrets.IMAGE_BUCKET_NAME }}
+          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD}}
 
         run: |
           # SSH 키 설정
@@ -49,6 +50,8 @@ jobs:
             export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
             export AWS_STORAGE_BUCKET_NAME="${{ secrets.AWS_STORAGE_BUCKET_NAME }}"
             export IMAGE_BUCKET_NAME="${{ secrets.IMAGE_BUCKET_NAME }}"
+            export EMAIL_HOST_PASSWORD="${{ secrets.EMAIL_HOST_PASSWORD }}"
+
 
             # 백엔드 디렉토리 이동
             cd /home/ubuntu/backend
@@ -74,6 +77,7 @@ jobs:
             echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env
             echo "AWS_STORAGE_BUCKET_NAME=$AWS_STORAGE_BUCKET_NAME" >> .env
             echo "IMAGE_BUCKET_NAME=$IMAGE_BUCKET_NAME" >> .env
+            echo "EMAIL_HOST_PASSWORD=$EMAIL_HOST_PASSWORD" >> .env
 
             # Django 마이그레이션 실행
             python manage.py migrate

@@ -120,8 +120,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # 사용할 이메일 서버
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'commit26.verify@gmail.com'  # 발신용 이메일
-EMAIL_HOST_PASSWORD = 'jbam adwz xtlw vcqr'  # 이메일 비밀번호 또는 앱 비밀번호
+EMAIL_HOST_USER = 'comptuk@gmail.com'  # 발신용 이메일
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') # 이메일 비밀번호 또는 앱 비밀번호
 
 if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
     getattr(ssl, '_create_unverified_context', None)):
