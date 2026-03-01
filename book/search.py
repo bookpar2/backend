@@ -17,7 +17,7 @@ class BookDocument(Document):
                 'tokenizer': {
                     'edge_ngram_tokenizer': {
                         'type': 'edge_ngram',
-                        'min_gram': 1,
+                        'min_gram': 2,
                         'max_gram': 25,
                         'token_chars': ['letter', 'digit']
                     }

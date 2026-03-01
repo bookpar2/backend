@@ -32,8 +32,10 @@ SECRET_KEY = 'django-insecure-v&legypwvt583ahw3a8gc@r)vd8x6$df0=h9+lynv2r(=2!@e=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [ '*' ]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
 
+ALLOWED_HOSTS = [ '*' ]
 
 # Application definition
 # 앱 나열해주기
