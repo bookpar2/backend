@@ -16,7 +16,7 @@
 # """
 from django.contrib import admin
 from django.urls import path, include
-from book.views import BookListCreateView, BookDetailView, BookListByUser, BookSearchView, BookListAllView
+from book.views import BookListCreateView, BookDetailView, BookListByUser, BookListAllView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
