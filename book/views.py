@@ -8,8 +8,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Book, BookImage
 from .serializers import BookSerializer, UserSerializer, BookCreateSerializer
-from elasticsearch_dsl.query import Bool, MultiMatch
-from .search import BookDocument
+# from elasticsearch_dsl.query import Bool, MultiMatch
+# from .search import BookDocument
 from django.db.models import Case, When, Value, IntegerField
 from uuid import uuid4
 
@@ -128,33 +128,33 @@ class BookDetailView(APIView):
         book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class BookSearchView(APIView):
-    def get(self, request, *args, **kwargs):
-        """서적 검색 (GET)"""
-        query = request.GET.get('q', '').strip()
+# class BookSearchView(APIView):
+#     def get(self, request, *args, **kwargs):
+#         """서적 검색 (GET)"""
+#         query = request.GET.get('q', '').strip()
         
-        if not query:
-            return Response({"error": 'Query parameter "q" is required.'}, status=400)
+#         if not query:
+#             return Response({"error": 'Query parameter "q" is required.'}, status=400)
 
-        # 제목, 저자, 설명, 전공 중 하나라도 검색어와 일치하면 검색
-        search_query = Bool(
-            should=[
-                MultiMatch(query=query, fields=['title']),
-                MultiMatch(query=query, fields=['description']),
-                MultiMatch(query=query, fields=['major'])
-            ],
-            minimum_should_match=1  # 하나라도 일치하면 검색됨
-        )
+#         # 제목, 저자, 설명, 전공 중 하나라도 검색어와 일치하면 검색
+#         search_query = Bool(
+#             should=[
+#                 MultiMatch(query=query, fields=['title']),
+#                 MultiMatch(query=query, fields=['description']),
+#                 MultiMatch(query=query, fields=['major'])
+#             ],
+#             minimum_should_match=1  # 하나라도 일치하면 검색됨
+#         )
 
-        # Elasticsearch 검색 실행
-        search = BookDocument.search().query(search_query)
-        results = search.execute()
+#         # Elasticsearch 검색 실행
+#         search = BookDocument.search().query(search_query)
+#         results = search.execute()
 
-        # 검색된 책 ID 리스트 가져오기
-        book_ids = [hit.meta.id for hit in results]
+#         # 검색된 책 ID 리스트 가져오기
+#         book_ids = [hit.meta.id for hit in results]
 
-        # DB에서 해당 책 정보 조회
-        books = Book.objects.filter(id__in=book_ids)
-        serializer = BookSerializer(books, many=True)
+#         # DB에서 해당 책 정보 조회
+#         books = Book.objects.filter(id__in=book_ids)
+#         serializer = BookSerializer(books, many=True)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
