@@ -225,9 +225,9 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Elasticsearch 설정 추가
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': ['http://localhost:9200'],  # Elasticsearch 서버 URL
-    }
-}
+# # Elasticsearch 설정 추가
+# ELASTICSEARCH_DSL = {
+#     'default': {
+#         'hosts': ['http://localhost:9200'],  # Elasticsearch 서버 URL
+#     }
+# }
