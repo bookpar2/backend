@@ -61,6 +61,20 @@ INSTALLED_APPS = [
     # 'django_elasticsearch_dsl',
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,  # 기존 로거 유지
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',  # stdout으로 출력
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',  # DEBUG 이상 모든 로그를 stdout으로
+    },
+}
+
 ASGI_APPLICATION = 'config.asgi.application'
 
 CHANNEL_LAYERS = {
