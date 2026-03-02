@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Book, BookImage
-from .serializers import BookSerializer, UserSerializer, BookCreateSerializer
+from .serializers import BookSerializer, UserSerializer, BookCreateSerializer, BookUpdateSerializer
 # from elasticsearch_dsl.query import Bool, MultiMatch
 # from .search import BookDocument
 from django.db.models import Case, When, Value, IntegerField
@@ -116,7 +116,7 @@ class BookDetailView(APIView):
     def patch(self, request, *args, **kwargs):
         """개별 서적 수정 (PATCH)"""
         book = Book.objects.get(pk=kwargs['pk'])
-        serializer = BookSerializer(book, data=request.data, partial=True)
+        serializer = BookUpdateSerializer(book, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
