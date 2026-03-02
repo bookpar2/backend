@@ -116,10 +116,42 @@ class BookDetailView(APIView):
     def patch(self, request, *args, **kwargs):
         """개별 서적 수정 (PATCH)"""
         book = Book.objects.get(pk=kwargs['pk'])
+
+        # images 파일 추출 (form-data)
+        files = request.data.getlist('images')  # 여러 파일 가능
+
+        # 나머지 필드 serializer 처리
         serializer = BookUpdateSerializer(book, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            serializer.save()  # 필드 업데이트
+
+            # 이미지 교체 처리
+            if files:
+                # 기존 이미지 삭제
+                book.images.all().delete()
+
+                # S3 클라이언트 연결
+                s3 = boto3.client(
+                    "s3",
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME,
+                )
+
+                # 파일 업로드 후 URL 생성
+                for file in files:
+                    file_stream = io.BytesIO(file.read())
+                    file_stream.seek(0)
+                    s3_file_name = f"image/{uuid4()}_{file.name}"
+                    s3.upload_fileobj(file_stream, Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_file_name)
+
+                    file_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_file_name}"
+                    BookImage.objects.create(book=book, image_url=file_url)
+
+            # 최종 응답: serializer로 반환
+            resp_serializer = BookSerializer(book)
+            return Response(resp_serializer.data)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, *args, **kwargs):

@@ -32,32 +32,30 @@ class BookCreateSerializer(serializers.ModelSerializer):
 
         return book
 
-class BookUpdateSerializer(serializers.ModelSerializer):
-    images = serializers.ListField(
-        child=serializers.CharField(),
-        write_only=True,
-        required=False
-    )
-    existing_images = BookImageSerializer(many=True, read_only=True)
+from rest_framework import serializers
+from .models import Book, BookImage
 
+class BookUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ['title', 'chatLink', 'price', 'description', 'major', 'status', 'images', 'existing_images']
+        fields = ['title', 'chatLink', 'price', 'description', 'major', 'status']
+        read_only_fields = []
 
     def update(self, instance, validated_data):
-        # 새로 보낸 이미지 배열 추출
-        new_images = validated_data.pop('images', None)
+        images = validated_data.pop('images', [])
 
-        # 나머지 필드 업데이트
+        # 필드 업데이트
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
         # 이미지 교체 처리
-        if new_images is not None:
-            instance.images.all().delete()  # 기존 이미지 삭제
-            for url in new_images:
-                BookImage.objects.create(book=instance, image_url=url)
+        if images is not None:
+            # 기존 이미지 삭제
+            instance.images.all().delete()
+            # BookImage 생성
+            for image_url in images:
+                BookImage.objects.create(book=instance, image_url=image_url)
 
         return instance
 
